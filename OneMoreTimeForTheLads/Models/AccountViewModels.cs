@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace OneMoreTimeForTheLads.Models
@@ -79,6 +80,52 @@ namespace OneMoreTimeForTheLads.Models
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        [Required]
+        [Display(Name = "First Name")]
+        public string FirstName { get; set; }
+
+        [Required]
+        [Display(Name = "Last Name")]
+        public string LastName { get; set; }
+
+        [Required]
+        [DataType(DataType.Date)]
+        [Display(Name = "Date Of Birth")]
+        public DateTime DateOfBirth { get; set; }
+
+        [Required]
+        [Display(Name = "Address")]
+        public string Address { get; set; }
+
+        [Required]
+        [Display(Name = "PostCode")]
+        public string PostCode { get; set; }
+
+        [Required]
+        [Display(Name = "Phone Number")]
+        public string PhoneNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Job Role")]
+        public string JobRole { get; set; }
+
+        [Required]
+        [DataType(DataType.Date)]
+        [Display(Name = "Start Date")]
+        public DateTime StartDate { get; set; }
+
+        [Required]
+        [Display(Name = "GitHub")]
+        public string GitHub { get; set; }
+
+        [Required]
+        [Display(Name = "LinkedIn")]
+        public string LinkedIn { get; set; }
+
+        public virtual ICollection<File> Files { get; set; }
+        public virtual ICollection<Document> Documents { get; set; }
+
     }
 
     public class ResetPasswordViewModel
@@ -109,4 +156,6 @@ namespace OneMoreTimeForTheLads.Models
         [Display(Name = "Email")]
         public string Email { get; set; }
     }
+
+    
 }

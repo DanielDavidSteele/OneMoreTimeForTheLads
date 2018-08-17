@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,6 +18,8 @@ namespace OneMoreTimeForTheLads.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        ApplicationDbContext appDb = new ApplicationDbContext();
+
         private ApplicationSignInManager _signInManager;
         private ApplicationUserManager _userManager;
 
@@ -51,6 +56,9 @@ namespace OneMoreTimeForTheLads.Controllers
                 _userManager = value;
             }
         }
+
+
+
 
         //
         // GET: /Account/Login
@@ -151,7 +159,22 @@ namespace OneMoreTimeForTheLads.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    DateOfBirth = model.DateOfBirth,
+                    Address = model.Address,
+                    PostCode = model.PostCode,
+                    PhoneNumber = model.PhoneNumber,
+                    JobRole = model.JobRole,
+                    StartDate = model.StartDate,
+                    GitHub = model.GitHub,
+                    LinkedIn = model.LinkedIn
+
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -171,6 +194,97 @@ namespace OneMoreTimeForTheLads.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
+
+
+
+        public ActionResult Info(string Id)
+        {
+            if (Id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            ApplicationUser user = appDb.Users.Find(Id);
+            if (user == null)
+                return HttpNotFound();
+            return View(user);
+        }
+
+        public ActionResult ViewAll()
+        {
+            return View(appDb.Users.ToList());
+        }
+
+        public ActionResult Edit (string Id)
+        {
+            if (Id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            ApplicationUser user = appDb.Users.Include(e => e.Files).SingleOrDefault(e => e.Id.Equals(Id));
+            user = appDb.Users.Include(e => e.Documents).SingleOrDefault(e => e.Id.Equals(Id));
+            if (user == null)
+                return HttpNotFound();
+            return View(user);
+        }
+
+        [HttpPost]
+        public ActionResult Edit(ApplicationUser user, HttpPostedFileBase upload, HttpPostedFileBase upload2)
+        {
+            var empToUpdate = appDb.Users.Find(user.Id);
+            if (TryUpdateModel(empToUpdate))
+            {
+                if (upload != null && upload.ContentLength > 0)
+                {
+                    if (empToUpdate.Files.Any(f => f.FileType == FileType.Avatar))
+                    {
+                        appDb.Files.Remove(empToUpdate.Files.First(f => f.FileType == FileType.Avatar));
+                    }
+                    var avatar = new Models.File
+                    {
+                        FileName = System.IO.Path.GetFileName(upload.FileName),
+                        FileType = FileType.Avatar,
+                        ContentType = upload.ContentType
+                    };
+                    using (var reader = new System.IO.BinaryReader(upload.InputStream))
+                    {
+                        avatar.Content = reader.ReadBytes(upload.ContentLength);
+                    }
+                    empToUpdate.Files = new List<Models.File> { avatar };
+                }
+
+                if (upload2 != null && upload2.ContentLength > 0)
+                {
+                    if (empToUpdate.Documents.Any(f => f.FileType == FileType.CV))
+                    {
+                        appDb.Documents.Remove(empToUpdate.Documents.First(f => f.FileType == FileType.CV));
+                    }
+                    var CV = new Models.Document
+                    {
+                        FileName = System.IO.Path.GetFileName(upload2.FileName),
+                        FileType = FileType.CV,
+                        ContentType = upload2.ContentType
+                    };
+                    using (var reader = new System.IO.BinaryReader(upload2.InputStream))
+                    {
+                        CV.Content = reader.ReadBytes(upload2.ContentLength);
+                    }
+                    empToUpdate.Documents = new List<Models.Document> { CV };
+                }
+
+
+                appDb.Entry(empToUpdate).State = System.Data.Entity.EntityState.Modified;
+                appDb.SaveChanges();
+                return RedirectToAction("ViewAll");
+                }
+                else
+                {
+                    return new EmptyResult();
+
+                }
+            }
+            
+
+
+
+
+
+
 
         //
         // GET: /Account/ConfirmEmail
