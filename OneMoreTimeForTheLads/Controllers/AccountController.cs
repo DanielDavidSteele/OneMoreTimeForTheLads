@@ -147,6 +147,7 @@ namespace OneMoreTimeForTheLads.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
+            ViewBag.Name = new SelectList(appDb.Roles.ToList(), "Name", "Name");
             return View();
         }
 
@@ -178,6 +179,8 @@ namespace OneMoreTimeForTheLads.Controllers
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    var employee = appDb.Roles.ToList();
+                    await this.UserManager.AddToRoleAsync(user.Id, "Employee");
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
@@ -188,6 +191,7 @@ namespace OneMoreTimeForTheLads.Controllers
 
                     return RedirectToAction("Index", "Home");
                 }
+                ViewBag.Name = new SelectList(appDb.Roles.ToList(), "Name", "Name");
                 AddErrors(result);
             }
 
