@@ -12,6 +12,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using OneMoreTimeForTheLads.Models;
+using WebApplication4.CustomFilters;
 
 namespace OneMoreTimeForTheLads.Controllers
 {
@@ -200,7 +201,7 @@ namespace OneMoreTimeForTheLads.Controllers
         }
 
 
-
+        [AuthLogin(Roles = "Employee, Admin")]
         public ActionResult Info(string Id)
         {
             if (Id == null)
@@ -211,11 +212,13 @@ namespace OneMoreTimeForTheLads.Controllers
             return View(user);
         }
 
+        [AuthLogin(Roles = "Admin")]
         public ActionResult ViewAll()
         {
             return View(appDb.Users.ToList());
         }
 
+        [AuthLogin(Roles = "Admin, Employee")]
         public ActionResult Edit (string Id)
         {
             if (Id == null)
@@ -228,6 +231,8 @@ namespace OneMoreTimeForTheLads.Controllers
         }
 
         [HttpPost]
+        [AuthLogin(Roles = "Admin, Employee")]
+        [ValidateAntiForgeryToken]
         public ActionResult Edit(ApplicationUser user, HttpPostedFileBase upload, HttpPostedFileBase upload2)
         {
             var empToUpdate = appDb.Users.Find(user.Id);
@@ -282,7 +287,47 @@ namespace OneMoreTimeForTheLads.Controllers
 
                 }
             }
-            
+
+
+        [AuthLogin(Roles = "Admin")]
+        public ActionResult Delete(string Id)
+        {
+            if (Id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            ApplicationUser user = appDb.Users.Find(Id);
+            if (user == null)
+                return HttpNotFound();
+            return View(user);
+        }
+
+        [HttpPost]
+        [AuthLogin(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(string Id, ApplicationUser user1)
+        {
+            ApplicationUser user = new ApplicationUser();
+
+            if (Id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            user = appDb.Users.Find(Id);
+            if (user == null)
+                return HttpNotFound();
+
+            if (user.Files.Any(f => f.FileType == FileType.Avatar))
+            {
+                appDb.Files.Remove(user.Files.First(f => f.FileType == FileType.Avatar));
+            }
+            if (user.Documents.Any(f => f.FileType == FileType.CV))
+            {
+                appDb.Documents.Remove(user.Documents.First(f => f.FileType == FileType.CV));
+            }
+            appDb.Users.Remove(user);
+            appDb.SaveChanges();
+            return RedirectToAction("ViewAll");
+
+
+        }
+
 
 
 
