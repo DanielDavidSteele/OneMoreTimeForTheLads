@@ -1,4 +1,6 @@
-﻿@model IEnumerable<OneMoreTimeForTheLads.Models.ApplicationUser>
+﻿@using Microsoft.AspNet.Identity
+@using OneMoreTimeForTheLads.Models
+@model IEnumerable<OneMoreTimeForTheLads.Models.ApplicationUser>
 
 @{
     ViewBag.Title = "ViewAll";
@@ -6,99 +8,31 @@
 
 <h2>ViewAll</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-<table class="table">
-    <tr>
-        <th>
-            @Html.DisplayNameFor(model => model.FirstName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LastName)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.DateOfBirth)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Address)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.PostCode)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.JobRole)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.StartDate)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.GitHub)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.LinkedIn)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.Email)
-        </th>
-        
-      
-        <th>
-            @Html.DisplayNameFor(model => model.PhoneNumber)
-        </th>
-        
-        <th>
-            @Html.DisplayNameFor(model => model.UserName)
-        </th>
-        <th></th>
-    </tr>
+<div class="container">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-sm-auto col-md-auto col-lg-auto" style="margin-top:30px">
+                @if (item.Files.Any(f => f.FileType == FileType.Avatar))
+                {
+                    <div class="rounded" style="border:solid; border-color:#007BFF; padding:10px">
+                        <img class="mx-auto d-block" style="height:200px; width:200px; object-fit:cover;" src="~/File?id=@item.Files.First(f => f.FileType == FileType.Avatar).FileId" href="" alt="avatar" /><br />
+                        
+                        @Html.ActionLink(item.FirstName + " " + item.LastName, "Info", new { id = item.Id }, new { @class = "btn btn-outline-primary btn-block" })                  
+                    
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded" style="border:solid; border-color:#007BFF; padding:10px">
+                        <img class="mx-auto d-block" style="height:200px; width:200px; object-fit:cover;" src="~/Content/img/default-avatar.png" href="" alt="avatar" /><br />
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.FirstName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.LastName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.DateOfBirth)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Address)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.PostCode)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.JobRole)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.StartDate)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.GitHub)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.LinkedIn)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Email)
-        </td>
-       
-        <td>
-            @Html.DisplayFor(modelItem => item.PhoneNumber)
-        </td>
-    
-        <td>
-            @Html.DisplayFor(modelItem => item.UserName)
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
+                        @Html.ActionLink(item.FirstName + " " + item.LastName, "Info", new { id = item.Id }, new { @class = "btn btn-outline-primary btn-block" })
 
-</table>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+

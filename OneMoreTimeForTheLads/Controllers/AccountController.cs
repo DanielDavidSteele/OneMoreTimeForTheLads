@@ -279,7 +279,7 @@ namespace OneMoreTimeForTheLads.Controllers
 
                 appDb.Entry(empToUpdate).State = System.Data.Entity.EntityState.Modified;
                 appDb.SaveChanges();
-                return RedirectToAction("ViewAll");
+                return RedirectToAction("Info", new { Id = User.Identity.GetUserId()});
                 }
                 else
                 {
